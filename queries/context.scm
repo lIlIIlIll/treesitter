@@ -2,40 +2,31 @@
 ; Structural context nodes
 ; =========================
 
-(package_clause
-  name: (qualified_identifier) @context)
-
+; 类：显示到类体开始前（避免把整个 body 展示出来）
 (class_declaration
-  name: (identifier) @context)
+  body: (class_body) @context.end) @context
 
-(extend_declaration
-  receiver: (type) @context)
-
-(function_declaration
-  name: (identifier) @context)
-(function_declaration
-  name: (operator_symbol) @context)
-
+; ====== 函数/方法/构造 ======
+; 构造器 init：显示到函数体开始前
 (init_declaration
-  "init" @context)
+  body: (function_body (block) @context.end)) @context
 
-(property_declaration
-  name: (identifier) @context)
-
-(match_expression
-  "match" @context)
-
-(match_case
-  pattern: (_) @context)
+; 普通函数/方法：显示到函数体开始前
+(function_declaration
+  body: (function_body (block) @context.end)) @context
 
 (if_expression
-  "if" @context)
+  consequence: (block) @context.end) @context
 
 (for_statement
-  "for" @context)
+  pattern: (pattern) @context.end) @context
 
 (while_statement
-  "while" @context)
+  condition: (expression) @context.end) @context
 
-(lambda_literal
-  parameters: (_) @context)
+(match_expression
+  subject:(_) @context.end) @context
+
+; 想要的话，还可以把包名作为最上层上下文（通常不需要）：
+; (package_clause) @context
+
