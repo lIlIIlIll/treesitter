@@ -80,6 +80,7 @@ module.exports = grammar({
     declaration: $ => choice(
       $.class_declaration,
       $.extend_declaration,
+      $.main_declaration,
       $.function_declaration,
       $.init_declaration,
       $.property_declaration
@@ -164,6 +165,15 @@ module.exports = grammar({
       field('name', $.identifier),
       optional(seq(':', $.type))
     ),
+
+    main_declaration: $ => seq(
+      repeat($.annotation),
+      "main",
+      field('parameters', $.parameter_list),
+      optional($.type_annotation),
+      field('body', $.function_body)
+    ),
+
 
     function_declaration: $ => seq(
       repeat($.annotation),
