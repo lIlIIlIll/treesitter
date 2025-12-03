@@ -1,0 +1,22 @@
+{
+  "name": "tree-sitter-cangjie",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tree-sitter grammar for Cangjie (subset for reflection sample)",
+  "main": "index.js",
+  "license": "UNLICENSED",
+  "engines": { "node": ">=14" },
+  "devDependencies": {
+    "tree-sitter": "^0.20.8",
+    "nan": "^2.18.0"
+  },
+  "tree-sitter": [
+    {
+      "scope": "source.cangjie",
+      "file-types": ["cj"],
+      "injection-regex": "^cangjie$",
+      "parser": "./src"
+    }
+  ]
+}
+
