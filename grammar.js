@@ -89,6 +89,7 @@ module.exports = grammar({
         "protected",
         "internal",
         "static",
+        "redef",
         "operator",
         "foreign",
         "macro",
@@ -341,6 +342,7 @@ module.exports = grammar({
         $.match_expression,
         $.as_expression,
         $.throw_expression,
+        $.type_argument_expression,
         $.binary_expression,
         $.unary_expression,
         $.call_expression,
@@ -348,6 +350,22 @@ module.exports = grammar({
         $.index_expression,
         $.postfix_unary_expression,
         $.primary_expression,
+      ),
+
+    type_argument_expression: ($) =>
+      prec.left(
+        PREC.call,
+        seq(
+          field(
+            "value",
+            choice(
+              $.member_expression,
+              $.index_expression,
+              $.primary_expression,
+            ),
+          ),
+          $.type_arguments,
+        ),
       ),
 
     primary_expression: ($) =>
