@@ -111,6 +111,8 @@
 
 (constructor_pattern
   name: (qualified_identifier) @constructor)
+(constructor_pattern
+  name: (qualified_identifier_with_dots) @constructor)
 
 ; typed pattern: x : T
 (typed_pattern

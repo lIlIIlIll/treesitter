@@ -46,6 +46,7 @@ module.exports = grammar({
     [$.call_expression, $.binary_expression],
     [$.qualified_identifier, $.primary_expression],
     [$.class_primary_constructor, $.primary_expression],
+    [$.qualified_identifier_with_dots],
   ],
 
   rules: {
@@ -170,8 +171,8 @@ module.exports = grammar({
         "{",
         optional("|"),
         $.constructor,
-        optional(seq("|", $.constructor)),
-        optional($.declaration),
+        repeat(seq("|", $.constructor)),
+        repeat($.declaration),
         "}",
       ),
 
@@ -310,6 +311,11 @@ module.exports = grammar({
 
     qualified_identifier: ($) =>
       prec.right(seq($.identifier, repeat(seq(".", $.identifier)))),
+
+    qualified_identifier_with_dots: ($) =>
+      prec.right(
+        seq($.identifier, ".", $.identifier, repeat(seq(".", $.identifier))),
+      ),
 
     block: ($) => seq("{", repeat($._statement), "}"),
 
@@ -722,12 +728,15 @@ module.exports = grammar({
       prec(1, seq(field("value", $.identifier), ":", field("type", $.type))),
 
     constructor_pattern: ($) =>
-      seq(
-        field("name", $.qualified_identifier),
-        "(",
-        optional(commaSep($.pattern)),
-        optional(","),
-        ")",
+      choice(
+        seq(
+          field("name", $.qualified_identifier),
+          "(",
+          optional(commaSep($.pattern)),
+          optional(","),
+          ")",
+        ),
+        seq(field("name", $.qualified_identifier_with_dots)),
       ),
 
     line_comment: ($) => token(seq("//", /[^\n]*/)),
