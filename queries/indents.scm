@@ -10,6 +10,7 @@
 ; Maintain indentation for block-like constructs
 (block) @indent.always
 (class_body) @indent.always
+(enum_body) @indent.always
 (property_body) @indent.always
 (lambda_literal) @indent.always
 (match_case) @indent.always

@@ -6,6 +6,10 @@
 (class_declaration
   body: (class_body) @context.end) @context
 
+; 枚举：显示到枚举体开始前
+(enum_declaration
+  body: (enum_body) @context.end) @context
+
 ; ====== 函数/方法/构造 ======
 ; 构造器 init：显示到函数体开始前
 (init_declaration
@@ -29,4 +33,3 @@
 
 ; 想要的话，还可以把包名作为最上层上下文（通常不需要）：
 ; (package_clause) @context
-

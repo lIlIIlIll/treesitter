@@ -39,6 +39,7 @@
   "import" @keyword)
 
 (class_declaration)    @keyword
+(enum_declaration)     @keyword
 (extend_declaration)   @keyword
 (function_declaration) @keyword
 (init_declaration)     @keyword
@@ -85,6 +86,8 @@
 ; =========================
 (class_declaration
   name: (identifier) @type)
+(enum_declaration
+  name: (identifier) @type)
 
 (type_reference
   name: (qualified_identifier) @type)
@@ -113,6 +116,8 @@
   name: (qualified_identifier) @constructor)
 (constructor_pattern
   name: (qualified_identifier_with_dots) @constructor)
+(constructor
+  constructorName: (identifier) @constructor)
 
 ; typed pattern: x : T
 (typed_pattern
