@@ -45,6 +45,7 @@ module.exports = grammar({
     [$.call_expression, $.unary_expression, $.binary_expression],
     [$.call_expression, $.binary_expression],
     [$.qualified_identifier, $.primary_expression],
+    [$.class_primary_constructor, $.primary_expression],
   ],
 
   rules: {
@@ -70,6 +71,7 @@ module.exports = grammar({
     declaration: ($) =>
       choice(
         $.class_declaration,
+        $.enum_declaration,
         $.extend_declaration,
         $.main_declaration,
         $.function_declaration,
@@ -108,6 +110,17 @@ module.exports = grammar({
         $.expression,
       ),
 
+    enum_declaration: ($) =>
+      seq(
+        repeat($.annotation),
+        repeat($.modifier),
+        "enum",
+        field("name", $.identifier),
+        optional($.type_parameters),
+        optional($.class_supertype_list),
+        field("body", choice($.enum_body, ";")),
+      ),
+
     class_declaration: ($) =>
       seq(
         repeat($.annotation),
@@ -123,8 +136,47 @@ module.exports = grammar({
       seq("<:", field("type", $.type), repeat(seq("&", $.type))),
 
     class_body: ($) =>
-      seq("{", repeat(choice($.declaration, $._statement)), "}"),
+      seq(
+        "{",
+        repeat(
+          choice($.class_primary_constructor, $.declaration, $._statement),
+        ),
+        "}",
+      ),
 
+    class_primary_constructor: ($) =>
+      seq(
+        optional(repeat($.annotation)),
+        repeat($.modifier),
+        field("name", $.identifier),
+        field("parameters", $.class_primary_constructor_parameter_list),
+        optional($.type_annotation),
+        field("body", $.function_body),
+      ),
+
+    class_primary_constructor_parameter_list: ($) =>
+      seq("(", optional(repeat(seq($.parameter_decl, optional(",")))), ")"),
+
+    parameter_decl: ($) =>
+      seq(
+        repeat($.modifier),
+        choice("let", "var", "const"),
+        field("name", $.identifier),
+        optional($.type_annotation),
+      ),
+
+    enum_body: ($) =>
+      seq(
+        "{",
+        optional("|"),
+        $.constructor,
+        optional(seq("|", $.constructor)),
+        optional($.declaration),
+        "}",
+      ),
+
+    constructor: ($) =>
+      seq(field("constructorName", $.identifier), optional($.parameter_list)),
     extend_declaration: ($) =>
       seq(
         repeat($.annotation),
