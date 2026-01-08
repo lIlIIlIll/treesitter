@@ -156,6 +156,8 @@
   source: (import_path) @namespace)
 (from_import_clause
   (import_path) @namespace)
+(import_items
+  (import_path) @namespace)
 
 (constructor_pattern
   name: (qualified_identifier) @constructor)

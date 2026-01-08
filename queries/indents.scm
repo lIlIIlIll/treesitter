@@ -14,6 +14,7 @@
 (property_body) @indent.always
 (lambda_literal) @indent.always
 (match_case) @indent.always
+(statement_block) @indent.always
 
 ; Align branch keywords with their matching constructs
 (["else" "catch" "finally"] @indent.branch)
