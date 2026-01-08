@@ -21,9 +21,7 @@
 (string_content)  @string
 (escape_sequence) @string.escape
 (unit_literal)    @constant.builtin
-["None"]          @constant.builtin
-((identifier) @constant.builtin
-  (#match? @constant.builtin "^(Nothing|Unit)$"))
+["None" "Nothing" "Unit"]          @constant.builtin
 
 (const_generic) @number
 
@@ -52,6 +50,10 @@
   "from" @keyword
   "import" @keyword)
 (from_import_clause "as" @keyword)
+(import_clause
+  alias: (identifier) @namespace)
+(from_import_clause
+  alias: (identifier) @namespace)
 
 (class_declaration)    @keyword
 (enum_declaration)     @keyword
@@ -77,11 +79,16 @@
 (match_case "case" @keyword)
 (for_statement)      @keyword.repeat
 (while_statement)    @keyword.repeat
+(do_statement "do" @keyword.repeat)
 (return_statement)   @keyword.return
 (throw_statement)    @keyword.exception
 (throw_expression)   @keyword.exception
 (break_statement)    @keyword
 (continue_statement) @keyword
+(spawn_expression "spawn" @keyword)
+(quote_expression "quote" @keyword)
+(is_expression
+  "is" @keyword.operator)
 
 ; try/catch/finally/synchronized/unsafe
 (try_statement)     @keyword.exception
@@ -300,6 +307,7 @@
 
 (member_expression "."   @punctuation.delimiter)
 (qualified_identifier "." @punctuation.delimiter)
+(qualified_identifier_with_dots "." @punctuation.delimiter)
 
 (parameter_list
   (parameter name: (identifier)))

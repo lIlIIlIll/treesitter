@@ -50,6 +50,8 @@ module.exports = grammar({
     [$.qualified_identifier, $.primary_expression],
     [$.class_primary_constructor, $.primary_expression],
     [$.qualified_identifier_with_dots],
+    [$.spawn_expression, $.call_expression, $.binary_expression],
+    [$.quote_expression, $.call_expression, $.binary_expression],
   ],
 
   rules: {
@@ -443,6 +445,7 @@ module.exports = grammar({
         $.throw_statement,
         $.break_statement,
         $.continue_statement,
+        $.do_statement,
         $.for_statement,
         $.while_statement,
         $.try_statement,
@@ -460,6 +463,8 @@ module.exports = grammar({
     break_statement: ($) => "break",
 
     continue_statement: ($) => "continue",
+
+    do_statement: ($) => seq("do", $.block),
 
     for_statement: ($) =>
       seq(
@@ -503,7 +508,10 @@ module.exports = grammar({
         $.if_expression,
         $.match_expression,
         $.as_expression,
+        $.is_expression,
         $.throw_expression,
+        $.spawn_expression,
+        $.quote_expression,
         $.type_argument_expression,
         $.binary_expression,
         $.unary_expression,
@@ -564,6 +572,8 @@ module.exports = grammar({
         $.char_literal,
         $.unit_literal,
         "None",
+        "Nothing",
+        "Unit",
       ),
 
     integer_literal: ($) =>
@@ -584,6 +594,14 @@ module.exports = grammar({
     _float_literal: ($) =>
       token(
         choice(
+          seq(
+            /0[xX]/,
+            /[0-9a-fA-F_]+/,
+            optional(seq(".", /[0-9a-fA-F_]+/)),
+            /[pP]/,
+            optional(choice("+", "-")),
+            /[0-9][0-9_]*/,
+          ),
           seq(
             DECIMAL_DIGITS,
             ".",
@@ -697,6 +715,12 @@ module.exports = grammar({
     this_expression: ($) => "this",
 
     super_expression: ($) => "super",
+
+    spawn_expression: ($) =>
+      prec.right(PREC.prefix, seq("spawn", choice($.expression, $.block))),
+
+    quote_expression: ($) =>
+      prec.right(PREC.prefix, seq("quote", choice($.expression, $.block))),
 
     call_expression: ($) =>
       prec.left(
@@ -815,6 +839,9 @@ module.exports = grammar({
         prec.left(PREC.exponent, seq($.expression, "**", $.expression)),
       ),
 
+    is_expression: ($) =>
+      prec.left(PREC.comparison, seq($.expression, "is", $.type)),
+
     as_expression: ($) =>
       prec.left(PREC.as, seq($.expression, choice("as", "as?"), $.type)),
 
@@ -868,6 +895,7 @@ module.exports = grammar({
         $.throw_statement,
         $.break_statement,
         $.continue_statement,
+        $.do_statement,
         $.for_statement,
         $.while_statement,
       ),
@@ -891,6 +919,8 @@ module.exports = grammar({
         $.string_literal,
         $.char_literal,
         "None",
+        "Nothing",
+        "Unit",
       ),
 
     pattern: ($) =>

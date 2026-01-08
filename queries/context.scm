@@ -57,6 +57,9 @@
 (match_expression
   subject:(_) @context.end) @context
 
+(do_statement
+  (block) @context.end) @context
+
 (try_statement
   (block) @context.end) @context
 
