@@ -177,7 +177,10 @@ module.exports = grammar({
       ),
 
     constructor: ($) =>
-      seq(field("constructorName", $.identifier), optional($.parameter_list)),
+      seq(
+        field("constructorName", $.identifier),
+        optional($.constructor_parameter_list),
+      ),
     extend_declaration: ($) =>
       seq(
         repeat($.annotation),
@@ -267,6 +270,27 @@ module.exports = grammar({
 
     parameter_list: ($) =>
       seq("(", optional(commaSep($.parameter)), optional(","), ")"),
+
+    constructor_parameter_list: ($) =>
+      seq(
+        "(",
+        optional(commaSep($.constructor_parameter)),
+        optional(","),
+        ")",
+      ),
+
+    constructor_parameter: ($) =>
+      choice(
+        $.type,
+        seq(
+          repeat($.annotation),
+          repeat($.modifier),
+          field("name", $.identifier),
+          optional("!"),
+          $.type_annotation,
+          optional(seq("=", field("default_value", $.expression))),
+        ),
+      ),
 
     parameter: ($) =>
       seq(

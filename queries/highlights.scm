@@ -41,6 +41,7 @@
 (class_declaration)    @keyword
 (enum_declaration)     @keyword
 (extend_declaration)   @keyword
+(main_declaration)     @keyword
 (function_declaration) @keyword
 (init_declaration)     @keyword
 (property_declaration) @keyword
@@ -55,9 +56,12 @@
 ; 控制流（用节点名匹配，而非裸字面量）
 (if_expression)      @keyword.conditional
 (match_expression)   @keyword.conditional
+(match_case "case" @keyword)
 (for_statement)      @keyword.repeat
 (while_statement)    @keyword.repeat
 (return_statement)   @keyword.return
+(throw_statement)    @keyword.exception
+(throw_expression)   @keyword.exception
 (break_statement)    @keyword
 (continue_statement) @keyword
 
@@ -88,6 +92,8 @@
   name: (identifier) @type)
 (enum_declaration
   name: (identifier) @type)
+(class_primary_constructor
+  name: (identifier) @constructor)
 
 (type_reference
   name: (qualified_identifier) @type)
@@ -129,6 +135,10 @@
 ; =========================
 (parameter
   name: (identifier) @variable.parameter)
+(constructor_parameter
+  name: (identifier) @variable.parameter)
+(parameter_decl
+  name: (identifier) @variable.parameter)
 
 (property_accessor
   (parameter_list
@@ -146,6 +156,8 @@
                 (binding_pattern (identifier) @variable))))
 
 (variable_declaration
+  ["let" "var" "const"] @keyword)
+(parameter_decl
   ["let" "var" "const"] @keyword)
 
 (variable_declaration
@@ -207,6 +219,8 @@
 ; =========================
 (operator_symbol)     @operator
 (assignment_operator) @operator
+(class_supertype_list "<:" @operator)
+(class_supertype_list "&" @operator)
 
 ; unary / postfix
 (unary_expression  ["+" "-" "!" "~" "++" "--"] @operator)
@@ -246,6 +260,11 @@
 ; =========================
 ["(" ")" "[" "]" "{" "}"] @punctuation.bracket
 ["," "." ":" ";"]         @punctuation.delimiter
+(enum_body "|" @punctuation.delimiter)
+(type_parameters "<" @punctuation.bracket)
+(type_parameters ">" @punctuation.bracket)
+(type_arguments "<" @punctuation.bracket)
+(type_arguments ">" @punctuation.bracket)
 
 (member_expression "."   @punctuation.delimiter)
 (qualified_identifier "." @punctuation.delimiter)
@@ -254,6 +273,10 @@
   (parameter name: (identifier)))
 
 (argument_list (argument))
+(argument
+  name: (identifier) @variable.parameter)
+
+(lambda_parameters (identifier) @variable.parameter)
 
 (tuple_expression (expression))
 
