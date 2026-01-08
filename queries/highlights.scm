@@ -12,10 +12,16 @@
 (boolean_literal) @boolean
 (char_literal)    @character
 (string_literal)  @string
+(multiline_string_literal) @string
+(multiline_string_content) @string
+(raw_string_literal) @string
+(byte_string_literal) @string
 (string_content)  @string
 (escape_sequence) @string.escape
 (unit_literal)    @constant.builtin
 ["None"]          @constant.builtin
+((identifier) @constant.builtin
+  (#match? @constant.builtin "^(Nothing|Unit)$"))
 
 (this_expression)  @variable.builtin
 (super_expression) @variable.builtin
@@ -37,10 +43,18 @@
   "package" @keyword)
 (import_clause
   "import" @keyword)
+(import_clause "as" @keyword)
+(from_import_clause
+  "from" @keyword
+  "import" @keyword)
+(from_import_clause "as" @keyword)
 
 (class_declaration)    @keyword
 (enum_declaration)     @keyword
 (extend_declaration)   @keyword
+(interface_declaration) @keyword
+(struct_declaration)    @keyword
+(type_declaration)      @keyword
 (main_declaration)     @keyword
 (function_declaration) @keyword
 (init_declaration)     @keyword
@@ -90,6 +104,12 @@
 ; =========================
 (class_declaration
   name: (identifier) @type)
+(interface_declaration
+  name: (identifier) @type)
+(struct_declaration
+  name: (identifier) @type)
+(type_declaration
+  name: (identifier) @type)
 (enum_declaration
   name: (identifier) @type)
 (class_primary_constructor
@@ -97,6 +117,8 @@
 
 (type_reference
   name: (qualified_identifier) @type)
+((identifier) @type.builtin
+  (#match? @type.builtin "^(Bool|Rune|Float16|Float32|Float64|Int8|Int16|Int32|Int64|IntNative|UInt8|UInt16|UInt32|UInt64|UIntNative|VArray|This)$"))
 
 (type_parameter
   name: (identifier) @type.parameter)
@@ -117,6 +139,12 @@
 
 (import_clause
   path: (import_path) @namespace)
+(import_clause
+  (import_path) @namespace)
+(from_import_clause
+  source: (import_path) @namespace)
+(from_import_clause
+  (import_path) @namespace)
 
 (constructor_pattern
   name: (qualified_identifier) @constructor)

@@ -10,6 +10,12 @@
 (enum_declaration
   body: (enum_body) @context.end) @context
 
+; 接口/结构体：显示到类体开始前
+(interface_declaration
+  body: (class_body) @context.end) @context
+(struct_declaration
+  body: (class_body) @context.end) @context
+
 ; extend：显示到 class body 开始前
 (extend_declaration
   (class_body) @context.end) @context

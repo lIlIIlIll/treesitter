@@ -22,6 +22,9 @@ const PREC = {
   as: 21,
 };
 
+const NUMBER_SUFFIX = /(u8|u16|u32|u64|i8|i16|i32|i64|f16|f32|f64)/;
+const DECIMAL_DIGITS = /[0-9][0-9_]*/;
+
 function commaSep1(rule) {
   return seq(rule, repeat(seq(",", rule)));
 }
@@ -53,12 +56,48 @@ module.exports = grammar({
     source_file: ($) => repeat($._top_level_item),
 
     _top_level_item: ($) =>
-      choice($.package_clause, $.import_clause, $.declaration, $._statement),
+      choice(
+        $.package_clause,
+        $.import_clause,
+        $.from_import_clause,
+        $.declaration,
+        $._statement,
+      ),
 
     package_clause: ($) =>
       seq("package", field("name", $.qualified_identifier)),
 
-    import_clause: ($) => seq("import", field("path", $.import_path)),
+    import_clause: ($) =>
+      seq(
+        "import",
+        choice(
+          seq(
+            optional(seq(field("prefix", $.import_path), ".")),
+            field("items", $.import_items),
+          ),
+          seq(
+            field("path", $.import_path),
+            optional(seq("as", field("alias", $.identifier))),
+          ),
+        ),
+      ),
+
+    from_import_clause: ($) =>
+      seq(
+        "from",
+        field("source", $.import_path),
+        "import",
+        choice(
+          seq(
+            optional(seq(field("prefix", $.import_path), ".")),
+            field("items", $.import_items),
+          ),
+          seq(
+            field("path", $.import_path),
+            optional(seq("as", field("alias", $.identifier))),
+          ),
+        ),
+      ),
 
     import_path: ($) =>
       token(
@@ -69,9 +108,15 @@ module.exports = grammar({
         ),
       ),
 
+    import_items: ($) =>
+      seq("{", optional(commaSep($.import_path)), optional(","), "}"),
+
     declaration: ($) =>
       choice(
         $.class_declaration,
+        $.interface_declaration,
+        $.struct_declaration,
+        $.type_declaration,
         $.enum_declaration,
         $.extend_declaration,
         $.main_declaration,
@@ -97,6 +142,7 @@ module.exports = grammar({
         "foreign",
         "macro",
         "inline",
+        "mut",
       ),
 
     annotation: ($) =>
@@ -131,6 +177,38 @@ module.exports = grammar({
         optional($.type_parameters),
         optional($.class_supertype_list),
         field("body", choice($.class_body, ";")),
+      ),
+
+    interface_declaration: ($) =>
+      seq(
+        repeat($.annotation),
+        repeat($.modifier),
+        "interface",
+        field("name", $.identifier),
+        optional($.type_parameters),
+        optional($.class_supertype_list),
+        field("body", choice($.class_body, ";")),
+      ),
+
+    struct_declaration: ($) =>
+      seq(
+        repeat($.annotation),
+        repeat($.modifier),
+        "struct",
+        field("name", $.identifier),
+        optional($.type_parameters),
+        optional($.class_supertype_list),
+        field("body", choice($.class_body, ";")),
+      ),
+
+    type_declaration: ($) =>
+      seq(
+        repeat($.annotation),
+        repeat($.modifier),
+        "type",
+        field("name", $.identifier),
+        optional($.type_parameters),
+        choice(seq("=", $.type), seq(":", $.type)),
       ),
 
     class_supertype_list: ($) =>
@@ -476,27 +554,55 @@ module.exports = grammar({
         $.integer_literal,
         $.float_literal,
         $.boolean_literal,
+        $.multiline_string_literal,
+        $.raw_string_literal,
+        $.byte_string_literal,
         $.string_literal,
         $.char_literal,
         $.unit_literal,
         "None",
       ),
 
-    integer_literal: ($) => token(choice(/0[xX][0-9a-fA-F_]+/, /[0-9][0-9_]*/)),
+    integer_literal: ($) =>
+      token(
+        seq(
+          choice(
+            seq(/0[xX]/, /[0-9a-fA-F_]+/),
+            seq(/0[bB]/, /[01_]+/),
+            seq(/0[oO]/, /[0-7_]+/),
+            DECIMAL_DIGITS,
+          ),
+          optional(NUMBER_SUFFIX),
+        ),
+      ),
 
     float_literal: ($) =>
       token(
         seq(
-          /[0-9][0-9_]*/,
           choice(
-            seq(".", /[0-9][0-9_]*/),
-            seq(/[eE]/, optional(choice("+", "-")), /[0-9][0-9_]*/),
+            seq(DECIMAL_DIGITS, ".", /[0-9][0-9_]*/, optional(seq(/[eE]/, optional(choice("+", "-")), /[0-9][0-9_]*/))),
+            seq(".", /[0-9][0-9_]*/, optional(seq(/[eE]/, optional(choice("+", "-")), /[0-9][0-9_]*/))),
+            seq(DECIMAL_DIGITS, seq(/[eE]/, optional(choice("+", "-")), /[0-9][0-9_]*/)),
           ),
-          optional(choice("f", "F", "d", "D")),
+          optional(NUMBER_SUFFIX),
         ),
       ),
 
     boolean_literal: ($) => choice("true", "false"),
+
+    multiline_string_literal: ($) =>
+      seq(
+        '"""',
+        repeat(
+          choice(
+            $.multiline_string_content,
+            $.escape_sequence,
+            $.string_interpolation,
+            $.string_dollar,
+          ),
+        ),
+        '"""',
+      ),
 
     string_literal: ($) =>
       seq(
@@ -513,6 +619,20 @@ module.exports = grammar({
       ),
 
     string_content: ($) => token.immediate(/[^"\\$]+/),
+
+    multiline_string_content: ($) =>
+      token.immediate(choice(/[^"]+/, /"[^"]/, /""[^"]/)),
+
+    raw_string_literal: ($) =>
+      token(
+        choice(
+          seq(choice("r", "br", "rb"), '"', repeat(/[^"]*/), '"'),
+          seq(choice("r", "br", "rb"), "'", repeat(/[^']*/), "'"),
+        ),
+      ),
+
+    byte_string_literal: ($) =>
+      token(seq("b", '"', repeat(choice(/[^"\\]/, /\\./)), '"')),
 
     escape_sequence: ($) =>
       token.immediate(
