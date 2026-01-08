@@ -407,7 +407,9 @@ module.exports = grammar({
     type_arguments: ($) =>
       seq("<", commaSep($.type_argument), optional(","), ">"),
 
-    type_argument: ($) => choice($.type, "_"),
+    type_argument: ($) => choice($.type, $.const_generic, "_"),
+
+    const_generic: ($) => token(seq("$", DECIMAL_DIGITS)),
 
     tuple_type: ($) => seq("(", commaSep2($.type), optional(","), ")"),
 
@@ -556,6 +558,7 @@ module.exports = grammar({
         $.boolean_literal,
         $.multiline_string_literal,
         $.raw_string_literal,
+        $.raw_hash_string_literal,
         $.byte_string_literal,
         $.string_literal,
         $.char_literal,
@@ -628,6 +631,28 @@ module.exports = grammar({
         choice(
           seq(choice("r", "br", "rb"), '"', repeat(/[^"]*/), '"'),
           seq(choice("r", "br", "rb"), "'", repeat(/[^']*/), "'"),
+        ),
+      ),
+
+    raw_hash_string_literal: ($) =>
+      token(
+        choice(
+          seq(
+            optional(choice("r", "br", "rb", "b")),
+            /#+/,
+            '"',
+            repeat(/[^"]*/),
+            '"',
+            /#+/,
+          ),
+          seq(
+            optional(choice("r", "br", "rb", "b")),
+            /#+/,
+            "'",
+            repeat(/[^']*/),
+            "'",
+            /#+/,
+          ),
         ),
       ),
 

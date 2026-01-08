@@ -15,6 +15,7 @@
 (multiline_string_literal) @string
 (multiline_string_content) @string
 (raw_string_literal) @string
+(raw_hash_string_literal) @string
 (byte_string_literal) @string
 (string_content)  @string
 (escape_sequence) @string.escape
@@ -22,6 +23,8 @@
 ["None"]          @constant.builtin
 ((identifier) @constant.builtin
   (#match? @constant.builtin "^(Nothing|Unit)$"))
+
+(const_generic) @number
 
 (this_expression)  @variable.builtin
 (super_expression) @variable.builtin
