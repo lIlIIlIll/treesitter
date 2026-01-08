@@ -567,29 +567,43 @@ module.exports = grammar({
       ),
 
     integer_literal: ($) =>
+      seq($._integer_literal, optional($.numeric_type_suffix)),
+
+    float_literal: ($) => seq($._float_literal, optional($.numeric_type_suffix)),
+
+    _integer_literal: ($) =>
       token(
-        seq(
-          choice(
-            seq(/0[xX]/, /[0-9a-fA-F_]+/),
-            seq(/0[bB]/, /[01_]+/),
-            seq(/0[oO]/, /[0-7_]+/),
-            DECIMAL_DIGITS,
-          ),
-          optional(NUMBER_SUFFIX),
+        choice(
+          seq(/0[xX]/, /[0-9a-fA-F_]+/),
+          seq(/0[bB]/, /[01_]+/),
+          seq(/0[oO]/, /[0-7_]+/),
+          DECIMAL_DIGITS,
         ),
       ),
 
-    float_literal: ($) =>
+    _float_literal: ($) =>
       token(
-        seq(
-          choice(
-            seq(DECIMAL_DIGITS, ".", /[0-9][0-9_]*/, optional(seq(/[eE]/, optional(choice("+", "-")), /[0-9][0-9_]*/))),
-            seq(".", /[0-9][0-9_]*/, optional(seq(/[eE]/, optional(choice("+", "-")), /[0-9][0-9_]*/))),
-            seq(DECIMAL_DIGITS, seq(/[eE]/, optional(choice("+", "-")), /[0-9][0-9_]*/)),
+        choice(
+          seq(
+            DECIMAL_DIGITS,
+            ".",
+            /[0-9][0-9_]*/,
+            optional(
+              seq(/[eE]/, optional(choice("+", "-")), /[0-9][0-9_]*/),
+            ),
           ),
-          optional(NUMBER_SUFFIX),
+          seq(
+            ".",
+            /[0-9][0-9_]*/,
+            optional(
+              seq(/[eE]/, optional(choice("+", "-")), /[0-9][0-9_]*/),
+            ),
+          ),
+          seq(DECIMAL_DIGITS, seq(/[eE]/, optional(choice("+", "-")), /[0-9][0-9_]*/)),
         ),
       ),
+
+    numeric_type_suffix: ($) => token(NUMBER_SUFFIX),
 
     boolean_literal: ($) => choice("true", "false"),
 

@@ -9,6 +9,7 @@
 ; =========================
 (integer_literal) @number
 (float_literal)   @number
+(numeric_type_suffix) @type
 (boolean_literal) @boolean
 (char_literal)    @character
 (string_literal)  @string
