@@ -246,15 +246,6 @@
     property: (identifier) @function.method)))
 
 
-; 类型实参 <T, U>
-(type_arguments
-  (type_argument
-    (type
-      (type_reference
-      name: (qualified_identifier (identifier))))
-  )
-)
-
 ; =========================
 ; Operators
 ; =========================

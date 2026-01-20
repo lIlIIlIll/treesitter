@@ -396,8 +396,15 @@ module.exports = grammar({
 
     type_annotation: ($) => seq(":", $.type),
 
-    type: ($) =>
+    type: ($) => choice($.function_type, $.type_atom),
+
+    type_atom: ($) =>
       choice(prec.right(seq(optional("?"), $.type_reference)), $.tuple_type),
+
+    function_type: ($) =>
+      prec.right(
+        seq(field("parameters", $.type_atom), "->", field("result", $.type)),
+      ),
 
     type_reference: ($) =>
       prec.right(
